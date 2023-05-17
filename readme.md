@@ -1,7 +1,7 @@
 # MAGDiff: Data Set Shift Detection on Deep Learning Models.
 ## Readme on how to run the experiments.
 
-You may find the python requirements in the file requirement.txt.
+You may find the python requirements in the file `requirements.txt`.
 
 ### Please follow these instructions to run the experiments:
 
