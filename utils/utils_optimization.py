@@ -234,8 +234,7 @@ def compute_TD_entropy_means_TD_predcl_per_class2(net, test_data_loader, compari
                                                  num_classes=10,
                                                  matrix_norm_only=True,
                                                  max_samples=np.inf,
-                                                 device=torch.device('cpu'),
-                                                 TU_computation=False):
+                                                 device=torch.device('cpu')):
 
     with torch.no_grad():
         try:
@@ -245,8 +244,6 @@ def compute_TD_entropy_means_TD_predcl_per_class2(net, test_data_loader, compari
 
         all_TDs = []
         all_TDs_pred_class = []
-        all_TUs = []
-        all_TUs_pred_class = []
         all_pred_classes = []
         all_pred_probas = []
         all_targets = []
@@ -268,40 +265,24 @@ def compute_TD_entropy_means_TD_predcl_per_class2(net, test_data_loader, compari
             predicted_classes = predicted_probas.argmax(dim=1)
             all_pred_classes.append(predicted_classes)
             all_pred_probas.append(predicted_probas)
-            if TU_computation == False:
-                all_TDs.append(torch.stack(compute_TD2(net, samples, comparison_data_labels_per_class, layer_names=layer_names,
-                       mean_adjacency_matrices_per_label_list=mean_adjacency_matrices_list,
-                      matrix_norm_only=matrix_norm_only)))
-                all_TDs_pred_class.append(all_TDs[-1][torch.arange(all_TDs[-1].size(0)), predicted_classes])
-                
-            else:
-                all_TUs.append(compute_TU(net, samples, comparison_data_labels_per_class, layer_names=layer_names,
-                      all_classes=True, mean_PDs_per_label_list=mean_adjacency_matrices_list,
-                      matrix_norm_only=matrix_norm_only))
-                all_TUs_pred_class.append(all_TUs[-1][torch.arange(all_TUs[-1].size(0)), predicted_classes])
+            all_TDs.append(torch.stack(compute_TD2(net, samples, comparison_data_labels_per_class, layer_names=layer_names,
+                   mean_adjacency_matrices_per_label_list=mean_adjacency_matrices_list,
+                  matrix_norm_only=matrix_norm_only)))
+            all_TDs_pred_class.append(all_TDs[-1][torch.arange(all_TDs[-1].size(0)), predicted_classes])
 
-
-        if TU_computation == False:
-            all_TDs = torch.cat(all_TDs, dim=0)
-            all_TDs_pred_class = torch.cat(all_TDs_pred_class, dim=0)
-            all_entropies_TD = compute_entropy_torch(all_TDs)
-        else:
-            all_TUs = torch.cat(all_TUs, dim=0)
-            all_TUs_pred_class = torch.cat(all_TUs_pred_class, dim=0)
-            all_entropies_TU = compute_entropy_torch(all_TUs)
+        all_TDs = torch.cat(all_TDs, dim=0)
+        all_TDs_pred_class = torch.cat(all_TDs_pred_class, dim=0)
+        all_entropies_TD = compute_entropy_torch(all_TDs)
         all_pred_classes = torch.cat(all_pred_classes, dim=0)
         all_pred_probas = torch.cat(all_pred_probas, dim=0)
         all_targets = torch.cat(all_targets, dim=0)
 
 
         dic = {
-            'TD_only_pred_class': all_TDs_pred_class.cpu() if not TU_computation else torch.empty(0),
-            'TD_all': all_TDs.cpu() if not TU_computation else torch.empty(0),
-            'TU_only_pred_class': all_TUs_pred_class.cpu() if TU_computation else torch.empty(0),
-            'TU_all': all_TUs.cpu() if TU_computation else torch.empty(0),
+            'TD_only_pred_class': all_TDs_pred_class.cpu(),
+            'TD_all': all_TDs.cpu(),
             'predicted_probas': all_pred_probas.cpu(),
-            'entropies_sum_TD': all_entropies_TD.cpu() if not TU_computation else torch.empty(0),
-            'entropies_sum_TU': all_entropies_TU.cpu() if TU_computation else torch.empty(0),
+            'entropies_sum_TD': all_entropies_TD.cpu(),
             'predicted_classes': all_pred_classes.cpu(),
             'targets': all_targets.cpu(),
         }
