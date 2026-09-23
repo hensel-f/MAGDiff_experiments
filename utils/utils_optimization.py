@@ -184,7 +184,11 @@ def compute_TD2(net, samples, comparison_data_labels_per_class,
 
                 #######
                 mean_adjacency_matrices_per_label_list.append(MAM)
-            mean_hook.remove()
+
+        ## The mean-adjacency hook is only needed for the block above. Removing it
+        ## here rather than inside the branch also covers the path where the mean
+        ## matrices are passed in precomputed -- which is the path taken per batch.
+        mean_hook.remove()
 
         mean_adjacency_matrices_per_label = torch.squeeze(torch.stack(mean_adjacency_matrices_per_label_list))
 
@@ -216,6 +220,11 @@ def compute_TD2(net, samples, comparison_data_labels_per_class,
         for i in range(matrix_diff_all.shape[0]):
             if matrix_norm_only:
                 res.append(torch.stack([torch.linalg.norm(md, ord='fro') for md in matrix_diff_all[i]]))
+
+        ## compute_TD2 is called once per batch, so a hook left registered here
+        ## accumulates: every later forward pass then runs every hook registered
+        ## so far, each holding on to its own detached activation tensor.
+        sample_hook.remove()
         return res
 
 
