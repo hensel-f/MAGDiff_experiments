@@ -51,3 +51,7 @@ This will execute the statistical tests and save the results in the directory `/
 
 Note: In the tables, the `PV-BL` entries corresponds to the results for the baseline, called `CV` in the paper, and `MN` corresponds to the MAGDiff matrix norm.
  
+
+## License
+
+MIT, see `LICENSE`.
